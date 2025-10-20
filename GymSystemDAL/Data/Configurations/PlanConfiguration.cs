@@ -1,0 +1,32 @@
+﻿using GymSystemDAL.Entities;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GymSystemDAL.Data.Configurations
+{
+    public class PlanConfiguration : IEntityTypeConfiguration<Plan>
+    {
+        public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Plan> builder)
+        {
+            builder.Property(X => X.Name)
+                .HasColumnType("varchar(50)");
+
+
+            builder.Property(X => X.Description)
+                .HasColumnType("varchar(200)");
+               
+
+            builder.Property(X => X.Price)
+                .HasPrecision(10, 2);
+
+            builder.ToTable(Tb =>
+            {
+                Tb.HasCheckConstraint("PlanDurationCheck", "DurationDays Between 1 and 365");
+            });
+        }
+    }
+}
