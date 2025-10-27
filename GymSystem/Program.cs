@@ -24,6 +24,8 @@ namespace GymSystem
 
             builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
             var app = builder.Build();
 

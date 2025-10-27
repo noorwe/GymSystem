@@ -12,13 +12,11 @@ namespace GymSystemBLL.Services.Classes
 {
     internal class TrainerService : ITrainerService
     {
-        private readonly IGenaricRepository<Trainer> _trainerRepository;
-        private readonly IGenaricRepository<Session> _sessionRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TrainerService(IGenaricRepository<Trainer> trainerRepository, IGenaricRepository<Session> sessionRepository)
+        public TrainerService(IUnitOfWork unitOfWork)
         {
-            _trainerRepository = trainerRepository;
-            _sessionRepository = sessionRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public bool CreateTrainer(CreateTrainerViewModel createdTrainer)
@@ -41,7 +39,8 @@ namespace GymSystemBLL.Services.Classes
                     },
                     Specialites = createdTrainer.Specialization,
                 };
-                return _trainerRepository.Add(trainer) > 0;
+                _unitOfWork.GetRepository<Trainer>().Add(trainer);
+                return _unitOfWork.SaveChanges() > 0;
             }
             catch (Exception)
             {
@@ -51,7 +50,7 @@ namespace GymSystemBLL.Services.Classes
 
         public IEnumerable<TrainerViewModel> GetAllTrainers()
         {
-            var trainers = _trainerRepository.GetAll();
+            var trainers = _unitOfWork.GetRepository<Trainer>().GetAll();
             if(trainers == null || trainers.Any()) return [];
 
             var trainerViewModels = trainers.Select(t => new TrainerViewModel
@@ -66,7 +65,7 @@ namespace GymSystemBLL.Services.Classes
 
         public TrainerViewModel? GetTrainerDetails(int TrainerId)
         {
-            var trainer = _trainerRepository.GetById(TrainerId);
+            var trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
             if (trainer == null) return null;
             var trainerViewModel = new TrainerViewModel
             {
@@ -82,7 +81,7 @@ namespace GymSystemBLL.Services.Classes
 
         public TrainerToUpdateViewModel? GetTrainerToUpdate(int TrainerId)
         {
-            var trainer = _trainerRepository.GetById(TrainerId);
+            var trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
             if (trainer == null) return null;
             var trainerToUpdate = new TrainerToUpdateViewModel
             {
@@ -99,14 +98,14 @@ namespace GymSystemBLL.Services.Classes
 
         public bool RemoveTrainer(int trainerId)
         {
-            var trainer = _trainerRepository.GetById(trainerId);
+            var trainer = _unitOfWork.GetRepository<Trainer>().GetById(trainerId);
             if (trainer == null)
             {
                 return false; 
             }
 
             // Check if the trainer has any future sessions
-            var hasFutureSession = _sessionRepository
+            var hasFutureSession = _unitOfWork.GetRepository<Session>()
                 .GetAll(s => s.TrainerId == trainerId && s.StartDate > DateTime.Now)
                 .Any();
 
@@ -117,7 +116,8 @@ namespace GymSystemBLL.Services.Classes
             try
             {
 
-               return _trainerRepository.Delete(trainer) > 0;
+               _unitOfWork.GetRepository<Trainer>().Delete(trainer);
+                return _unitOfWork.SaveChanges() > 0;
 
             }
             catch (Exception)
@@ -135,7 +135,7 @@ namespace GymSystemBLL.Services.Classes
 
             try
             {
-                var trainer = _trainerRepository.GetById(TrainerId);
+                var trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
                 if (trainer == null) return false;
                 trainer.Name = updateTrainer.Name;
                 trainer.Email = updateTrainer.Email;
@@ -145,7 +145,8 @@ namespace GymSystemBLL.Services.Classes
                 trainer.Address.City = updateTrainer.City;
                 trainer.Specialites = updateTrainer.Specialization;
                 trainer.UpdatedAt = DateTime.Now;
-                return _trainerRepository.Update(trainer) > 0;
+                _unitOfWork.GetRepository<Trainer>().Update(trainer);
+                return _unitOfWork.SaveChanges() > 0;
             }
             catch (Exception)
             {
@@ -163,13 +164,13 @@ namespace GymSystemBLL.Services.Classes
 
         private bool IsEmailExist(string email)
         {
-            return _trainerRepository.GetAll(m => m.Email == email).Any();
+            return _unitOfWork.GetRepository<Trainer>().GetAll(m => m.Email == email).Any();
 
         }
 
         private bool IsPhoneExist(string phone)
         {
-            return _trainerRepository.GetAll(m => m.Phone == phone).Any();
+            return _unitOfWork.GetRepository<Trainer>().GetAll(m => m.Phone == phone).Any();
 
         }
         #endregion
