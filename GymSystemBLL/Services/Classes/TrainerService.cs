@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace GymSystemBLL.Services.Classes
 {
-    internal class TrainerService : ITrainerService
+    public class TrainerService : ITrainerService
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -51,10 +51,11 @@ namespace GymSystemBLL.Services.Classes
         public IEnumerable<TrainerViewModel> GetAllTrainers()
         {
             var trainers = _unitOfWork.GetRepository<Trainer>().GetAll();
-            if(trainers == null || trainers.Any()) return [];
+            if(trainers == null || !trainers.Any()) return [];
 
             var trainerViewModels = trainers.Select(t => new TrainerViewModel
             {
+                Id = t.Id,
                 Name = t.Name,
                 Email = t.Email,
                 Phone = t.Phone,

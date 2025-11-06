@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace GymSystemBLL.Services.Classes
 {
-    internal class MemberService : IMemberService
+    public class MemberService : IMemberService
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -87,7 +87,7 @@ namespace GymSystemBLL.Services.Classes
             #region Second Way Using LINQ Method Syntax
 
             var Members = _unitOfWork.GetRepository<Member>().GetAll();
-            if (Members == null || Members.Any()) return [];
+            if (Members == null || !Members.Any()) return [];
                 
             var memberViewModels = Members.Select(m => new MemberViewModel
             {
@@ -173,7 +173,13 @@ namespace GymSystemBLL.Services.Classes
             }
             else
             {
-                var hasActiveMemberSession = _unitOfWork.GetRepository<MemberSession>().GetAll(ms => ms.MemberId == MemberId && ms.Session.StartDate > DateTime.Now).Any();
+                //var hasActiveMemberSession = _unitOfWork.GetRepository<MemberSession>().GetAll(ms => ms.MemberId == MemberId && ms.Session.StartDate > DateTime.Now).Any();
+
+                var SessionIDs = _unitOfWork.GetRepository<MemberSession>().GetAll(X => X.MemberId == MemberId).Select(X => X.SessionId);
+
+                var hasActiveMemberSession = _unitOfWork.GetRepository<Session>()
+                    .GetAll(X => SessionIDs.Contains(X.Id) && X.StartDate > DateTime.Now).Any();
+
                 if (hasActiveMemberSession) return false;
 
                 var memberships = _unitOfWork.GetRepository<Membership>().GetAll(m => m.MemberId == MemberId);
@@ -205,10 +211,20 @@ namespace GymSystemBLL.Services.Classes
             try
             {
 
-                if (IsEmailExist(updateMember.Email) || IsPhoneExist(updateMember.Phone)) return false;
+                //if (IsEmailExist(updateMember.Email) || IsPhoneExist(updateMember.Phone)) return false;
+
+                var emailExist = _unitOfWork.GetRepository<Member>()
+                    .GetAll(X => X.Email == updateMember.Email && X.Id != MemberId);
+
+                var phoneExist = _unitOfWork.GetRepository<Member>()
+                    .GetAll(X => X.Phone == updateMember.Phone && X.Id != MemberId);
+
+                if (emailExist.Any() || phoneExist.Any()) return false;
+
 
                 var Member = _unitOfWork.GetRepository<Member>().GetById(MemberId);
                 if (Member == null) return false;
+
 
                 Member.Email = updateMember.Email;
                 Member.Phone = updateMember.Phone;
