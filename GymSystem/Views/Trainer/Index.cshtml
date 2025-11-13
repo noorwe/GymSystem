@@ -51,7 +51,7 @@
                             <td><span>@trainer.Email</span></td>
                             <td><span>@trainer.Phone</span></td>
                             <td>
-                                <span class="badge bg-primary-color">GeneralFitness</span>
+                                <span class="badge bg-primary-color">@trainer.Specialization</span>
                             </td>
                             <td class="action position-relative">
                                 <div class="dropdown">
@@ -73,7 +73,7 @@
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li>
-                                            <a href="Trainer/Edit/TrainerId"
+                                            <a asp-controller="Trainer" asp-action="TrainerEdit" asp-route-id="@trainer.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
                                                 <i class="bi bi-pencil text-primary-color"></i>
                                                 <span>Edit Details</span>
@@ -83,7 +83,7 @@
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li>
-                                            <a href="Trainer/Delete/TrainerId"
+                                            <a asp-controller="Trainer" asp-action="Delete" asp-route-id="@trainer.Id"
                                                class="dropdown-item d-flex align-items-center gap-3 text-danger">
                                                 <i class="bi bi-trash"></i>
                                                 <span>Delete</span>

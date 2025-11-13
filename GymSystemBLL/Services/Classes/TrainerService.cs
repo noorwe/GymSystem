@@ -1,4 +1,5 @@
-﻿using GymSystemBLL.Services.Interfaces;
+﻿using AutoMapper.Execution;
+using GymSystemBLL.Services.Interfaces;
 using GymSystemBLL.ViewModels;
 using GymSystemDAL.Entities;
 using GymSystemDAL.Repositories.Interfaces;
@@ -132,7 +133,15 @@ namespace GymSystemBLL.Services.Classes
 
         public bool UpdateTrainerDetails(int TrainerId, TrainerToUpdateViewModel updateTrainer)
         {
-            if (IsEmailExist(updateTrainer.Email) || IsPhoneExist(updateTrainer.Phone)) return false;
+            // if (IsEmailExist(updateTrainer.Email) || IsPhoneExist(updateTrainer.Phone)) return false;
+
+            var emailExist = _unitOfWork.GetRepository<Trainer>()
+    .GetAll(X => X.Email == updateTrainer.Email && X.Id != TrainerId);
+
+            var phoneExist = _unitOfWork.GetRepository<Trainer>()
+                .GetAll(X => X.Phone == updateTrainer.Phone && X.Id != TrainerId);
+
+            if (emailExist.Any() || phoneExist.Any()) return false;
 
             try
             {

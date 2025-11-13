@@ -135,6 +135,21 @@ namespace GymSystemBLL.Services.Classes
         }
 
 
+        public IEnumerable<TrainerSelectViewModel> GetTrainerForSessons()
+        {
+            var Trainers = _unitOfWork.GetRepository<Trainer>().GetAll();
+
+            return _mapper.Map<IEnumerable<TrainerSelectViewModel>>(Trainers);
+        }
+
+        public IEnumerable<CategorySelectViewModel> GetCategoryForSessons()
+        {
+            var Categories = _unitOfWork.GetRepository<Category>().GetAll();
+
+            return _mapper.Map<IEnumerable<CategorySelectViewModel>>(Categories);
+        }
+
+
 
         #region Helper Methods
 
@@ -172,7 +187,7 @@ namespace GymSystemBLL.Services.Classes
         {
             if (session is null) return false;
 
-            if (session.EndDate < DateTime.Now) return false;
+            // if (session.EndDate < DateTime.Now) return false;
 
             if (session.StartDate > DateTime.Now) return false;
 
@@ -183,6 +198,8 @@ namespace GymSystemBLL.Services.Classes
 
             return true;
         }
+
+
 
 
         #endregion

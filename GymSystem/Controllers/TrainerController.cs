@@ -60,7 +60,7 @@ namespace GymSystem.Controllers
         }
 
         [HttpPost]
-        public ActionResult MemberEdit([FromRoute] int id, TrainerToUpdateViewModel trainerToUpdate)
+        public ActionResult TrainerEdit([FromRoute] int id, TrainerToUpdateViewModel trainerToUpdate)
         {
             if (!ModelState.IsValid)
             {
@@ -72,11 +72,11 @@ namespace GymSystem.Controllers
 
             if (Result)
             {
-                TempData["SuccessMessage"] = "Member Updated Successfully !";
+                TempData["SuccessMessage"] = "Trainer Updated Successfully !";
             }
             else
             {
-                TempData["ErrorMessage"] = "Member Failed To Update !";
+                TempData["ErrorMessage"] = "Trainer Failed To Update !";
             }
 
             return RedirectToAction(nameof(Index));
@@ -113,43 +113,43 @@ namespace GymSystem.Controllers
         }
 
 
-        //public ActionResult Delete(int id)
-        //{
-        //    if (id <= 0)
-        //    {
-        //        TempData["ErrorMessage"] = "Id Can Not Be 0 Or Negative Number !";
-        //        return RedirectToAction(nameof(Index));
-        //    }
+        public ActionResult Delete(int id)
+        {
+            if (id <= 0)
+            {
+                TempData["ErrorMessage"] = "Id Can Not Be 0 Or Negative Number !";
+                return RedirectToAction(nameof(Index));
+            }
 
-        //    var Member = _memberService.GetMemberDetails(id);
-        //    if (Member == null)
-        //    {
-        //        TempData["ErrorMessage"] = "Member Not Found !";
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewBag.MemberId = id;
-        //    ViewBag.MemberName = Member.Name;
-        //    return View();
-        //}
+            var Trainer = _trainerService.GetTrainerDetails(id);
+            if (Trainer == null)
+            {
+                TempData["ErrorMessage"] = "Trainer Not Found !";
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.TrainerId = id;
+            ViewBag.TrainerName = Trainer.Name;
+            return View();
+        }
 
 
-        //public ActionResult DeleteConfirmed([FromForm] int id)
-        //{
+        public ActionResult DeleteConfirmed([FromForm] int id)
+        {
 
-        //    var Result = _memberService.RemoveMember(id);
+            var Result = _trainerService.RemoveTrainer(id);
 
-        //    if (Result)
-        //    {
-        //        TempData["SuccessMessage"] = "Member Deleted Successfully !";
-        //    }
-        //    else
-        //    {
-        //        TempData["ErrorMessage"] = "Member Failed To Delete !";
+            if (Result)
+            {
+                TempData["SuccessMessage"] = "Trainer Deleted Successfully !";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Trainer Failed To Delete !";
 
-        //    }
+            }
 
-        //    return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
 
-        //}
+        }
     }
 }
