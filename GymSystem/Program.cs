@@ -1,10 +1,13 @@
 using GymSystemBLL;
+using GymSystemBLL.AttachmentService;
 using GymSystemBLL.Services.Classes;
 using GymSystemBLL.Services.Interfaces;
 using GymSystemDAL.Data.Context;
 using GymSystemDAL.Data.DataSeed;
+using GymSystemDAL.Entities;
 using GymSystemDAL.Repositories.Classes;
 using GymSystemDAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSystem
@@ -44,6 +47,24 @@ namespace GymSystem
 
             builder.Services.AddScoped<ISessionService,  SessionService>();
 
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(Config =>
+            {
+                Config.Password.RequiredLength = 6;
+                Config.User.RequireUniqueEmail = true;
+
+            }).AddEntityFrameworkStores<GymSystemDbContext>();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
+            
+            builder.Services.AddScoped<IAccountService, AccountService>();
+
 
             var app = builder.Build();
 
@@ -59,6 +80,12 @@ namespace GymSystem
 
             GymDbContextSeeding.SeedData(dbContext);
 
+            var roleManager = Scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            var userManager = Scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            IdentityDbContextSeeding.SeedData(roleManager, userManager);
+
             #endregion
 
             // Configure the HTTP request pipeline.
@@ -72,12 +99,13 @@ namespace GymSystem
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Account}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

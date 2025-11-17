@@ -1,4 +1,5 @@
-﻿using GymSystemBLL.Services.Interfaces;
+﻿using GymSystemBLL.AttachmentService;
+using GymSystemBLL.Services.Interfaces;
 using GymSystemBLL.ViewModels;
 using GymSystemDAL.Entities;
 using GymSystemDAL.Repositories.Interfaces;
@@ -13,10 +14,12 @@ namespace GymSystemBLL.Services.Classes
     public class MemberService : IMemberService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAttachmentService _attachmentService;
 
-        public MemberService(IUnitOfWork unitOfWork)
+        public MemberService(IUnitOfWork unitOfWork, IAttachmentService attachmentService)
         {
             _unitOfWork = unitOfWork;
+            _attachmentService = attachmentService;
         }
 
         // public IGenaricRepository<Membership> MembershipRepository { get; }
@@ -26,6 +29,10 @@ namespace GymSystemBLL.Services.Classes
             try
             {
                 if (IsEmailExist(createdMember.Email) || IsPhoneExist(createdMember.Phone)) return false;
+
+                var PhotoName = _attachmentService.Upload("members", createdMember.PhotoFile);
+
+                if(string.IsNullOrEmpty(PhotoName) ) return false;
               
                 var member = new Member()
                 {
@@ -48,9 +55,21 @@ namespace GymSystemBLL.Services.Classes
                         Note = createdMember.HealthViewModel.Note
                     }
                 };
+
+                member.Photo = PhotoName;
+
                 _unitOfWork.GetRepository<Member>().Add(member);
 
-                return _unitOfWork.SaveChanges() > 0;
+                var IsCreated = _unitOfWork.SaveChanges() > 0;
+                if (!IsCreated) 
+                {
+                    _attachmentService.Delete(PhotoName, "members");
+                    return false;
+                }
+                else 
+                {
+                    return IsCreated;
+                }
 
             }
             catch (Exception)
@@ -194,7 +213,11 @@ namespace GymSystemBLL.Services.Classes
                         }
                     }
                     _unitOfWork.GetRepository<Member>().Delete(member);
-                    return _unitOfWork.SaveChanges() > 0;
+                    var IsDeleted = _unitOfWork.SaveChanges() > 0;
+                    if (IsDeleted) 
+                         _attachmentService.Delete(member.Photo, "members");
+
+                    return IsDeleted;
                 }
                 catch (Exception)
                 {

@@ -12,7 +12,7 @@ namespace GymSystemDAL.Entities
 
         // I Will Use This Column as HireDate For Member => Configurations
 
-        public string? Photo {  get; set; }
+        public string Photo { get; set; } = null!;
 
 
         #region 1:1 RS Between Member HealthRecord
